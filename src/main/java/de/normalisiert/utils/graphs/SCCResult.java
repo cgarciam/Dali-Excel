@@ -1,32 +1,34 @@
 package de.normalisiert.utils.graphs;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Vector;
+
+import net.algowiki.Node;
 
 public class SCCResult {
-	private Set nodeIDsOfSCC = null;
-	private Vector[] adjList = null;
-	private int lowestNodeId = -1;
-	
-	public SCCResult(Vector[] adjList, int lowestNodeId) {
+	private final List<Node>[] adjList;
+	private final Integer lowestNodeId;
+
+	public SCCResult(final List<Node>[] adjList, final Integer lowestNodeId) {
+		final Set<Integer> nodeIDsOfSCC = new HashSet<Integer>();
 		this.adjList = adjList;
 		this.lowestNodeId = lowestNodeId;
-		this.nodeIDsOfSCC = new HashSet();
 		if (this.adjList != null) {
 			for (int i = this.lowestNodeId; i < this.adjList.length; i++) {
 				if (this.adjList[i].size() > 0) {
-					this.nodeIDsOfSCC.add(new Integer(i));
+					nodeIDsOfSCC.add(Integer.valueOf(i));
 				}
 			}
 		}
 	}
 
-	public Vector[] getAdjList() {
+	public List<Node>[] getAdjList() {
 		return adjList;
 	}
 
-	public int getLowestNodeId() {
+	public Integer getLowestNodeId() {
 		return lowestNodeId;
 	}
+
 }

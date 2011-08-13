@@ -3,8 +3,12 @@ package de.normalisiert.utils.graphs;
 import java.util.List;
 import java.util.Vector;
 
+import net.algowiki.AdjacencyList;
+import net.algowiki.Edge;
 import net.algowiki.Node;
 
+import org.jgrapht.graph.AbstractGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +38,10 @@ import org.slf4j.LoggerFactory;
  * @version 1.1, 22.03.2009
  * 
  */
-public class StrongConnectedComponents {
+public class StrongConnectedComponentsWithJgraphT {
 
 	/** Adjacency-list of original graph */
-	private int[][] adjListOriginal = null;
+	private AdjacencyList adjListOriginal;
 
 	/** Adjacency-list of currently viewed subgraph */
 	private int[][] adjList = null;
@@ -66,8 +70,12 @@ public class StrongConnectedComponents {
 	 * @param adjList
 	 *            adjacency-list of the graph
 	 */
-	public StrongConnectedComponents(int[][] adjList) {
-		this.adjListOriginal = adjList;
+	public StrongConnectedComponentsWithJgraphT(int[][] adjList) {
+
+	}
+
+	public StrongConnectedComponentsWithJgraphT(AdjacencyList adjList2) {
+		this.adjListOriginal = adjList2;
 	}
 
 	/**
@@ -77,12 +85,12 @@ public class StrongConnectedComponents {
 	 * that trivial strong connected components with just one node will not be
 	 * returned.
 	 * 
-	 * @param node
+	 * @param vertex
 	 *            node s
 	 * @return SCCResult with adjacency-structure of the strong connected
 	 *         component; null, if no such component exists
 	 */
-	public SCCResult getAdjacencyList(int node) {
+	public SCCResult getAdjacencyList(final Node vertex) {
 		this.visited = new boolean[this.adjListOriginal.length];
 		this.lowlink = new int[this.adjListOriginal.length];
 		this.number = new int[this.adjListOriginal.length];
@@ -90,15 +98,15 @@ public class StrongConnectedComponents {
 		this.stack = new Vector();
 		this.currentSCCs = new Vector();
 
-		this.makeAdjListSubgraph(node);
+		this.makeAdjListSubgraph(vertex);
 
-		for (int i = node; i < this.adjListOriginal.length; i++) {
+		for (int i = vertex; i < this.adjListOriginal.length; i++) {
 			if (!this.visited[i]) {
 				this.getStrongConnectedComponents(i);
 				Vector nodes = this.getLowestIdComponent();
-				if (nodes != null && !nodes.contains(Integer.valueOf(node))
-						&& !nodes.contains(Integer.valueOf(node + 1))) {
-					return this.getAdjacencyList(node + 1);
+				if (nodes != null && !nodes.contains(Integer.valueOf(vertex))
+						&& !nodes.contains(Integer.valueOf(vertex + 1))) {
+					return this.getAdjacencyList(vertex + 1);
 				} else {
 					Vector[] adjacencyList = this.getAdjList(nodes);
 					if (adjacencyList != null) {
@@ -237,17 +245,25 @@ public class StrongConnectedComponents {
 		}
 	}
 
+	/**
+	 * Version del main usando la estructura alterna con API JgraphT.
+	 */
 	public static void main(String[] args) {
 
-		boolean[][] adjMatrix = initGraph();
+		initGraph();
 
-		int[][] adjList = AdjacencyList.getAdjacencyList(adjMatrix);
-		StrongConnectedComponents scc = new StrongConnectedComponents(adjList);
-		for (int i = 0; i < adjList.length; i++) {
-			LOG.debug("i: " + i + "\n");
-			SCCResult r = scc.getAdjacencyList(i);
+		final AdjacencyList adjList = new net.algowiki.AdjacencyList(
+				initGraph());// .getAdjacent(v)
+		final StrongConnectedComponentsWithJgraphT scc = new StrongConnectedComponentsWithJgraphT(
+				adjList);
+		for (final Node vertex : adjList.getSourceNodeSet()) {
+			LOG.debug("vertex_i: " + vertex + "\n");
+			SCCResult r = scc.getAdjacencyList(vertex);
 			if (r != null) {
-				List<Node>[] al = scc.getAdjacencyList(i).getAdjList();
+				List<Node>[] al = scc.getAdjacencyList(vertex).getAdjList();
+				for (List<Node> list : al) {
+					
+				}
 				for (int j = i; j < al.length; j++) {
 					if (al[j].size() > 0) {
 						LOG.debug("j: " + j);
@@ -262,41 +278,32 @@ public class StrongConnectedComponents {
 		}
 	}
 
-	private static boolean[][] initGraph() {
-		boolean[][] adjMatrix = new boolean[10][];
+	private static AbstractGraph<Node, Edge> initGraph() {
+		// TODO To generalize final AbstractGraph<? extends Object, ? extends
+		// Object> graph = new DefaultDirectedGraph<Object, Object>(
+		// Edge.class);
+		final AbstractGraph<Node, Edge> graph = new DefaultDirectedGraph<Node, Edge>(
+				Edge.class);
+		Node v0 = new Node(0);
+		Node v1 = new Node(1);
+		Node v2 = new Node(2);
 
-		for (int i = 0; i < 10; i++) {
-			adjMatrix[i] = new boolean[10];
-		}
+		graph.addVertex(v0);
+		graph.addVertex(v1);
+		graph.addVertex(v2);
 
-		/*
-		 * adjMatrix[0][1] = true; adjMatrix[1][2] = true; adjMatrix[2][0] =
-		 * true; adjMatrix[2][4] = true; adjMatrix[1][3] = true; adjMatrix[3][6]
-		 * = true; adjMatrix[6][5] = true; adjMatrix[5][3] = true;
-		 * adjMatrix[6][7] = true; adjMatrix[7][8] = true; adjMatrix[7][9] =
-		 * true; adjMatrix[9][6] = true;
-		 */
+		graph.addEdge(v0, v1, new Edge(v0, v1));
+		graph.addEdge(v1, v0, new Edge(v1, v0));
+		graph.addEdge(v1, v2, new Edge(v1, v2));
 
-		adjMatrix[0][1] = true;
-		adjMatrix[1][2] = true;
-		adjMatrix[2][0] = true;
-		adjMatrix[2][6] = true;
-		adjMatrix[3][4] = true;
-		adjMatrix[4][5] = true;
-		adjMatrix[4][6] = true;
-		adjMatrix[5][3] = true;
-		adjMatrix[6][7] = true;
-		adjMatrix[7][8] = true;
-		adjMatrix[8][6] = true;
-
-		adjMatrix[6][1] = true;
-		return adjMatrix;
+		return graph;
 	}
 
 	private static final Logger LOG;
 
 	static {
-		LOG = LoggerFactory.getLogger(StrongConnectedComponents.class);
+		LOG = LoggerFactory
+				.getLogger(StrongConnectedComponentsWithJgraphT.class);
 	}
 
 }

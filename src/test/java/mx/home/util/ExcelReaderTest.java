@@ -12,6 +12,7 @@ import jxl.read.biff.BiffException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 public class ExcelReaderTest {
 
@@ -19,23 +20,25 @@ public class ExcelReaderTest {
 	// TODO? To transform in other kind of exception??? maybe a runtime???
 	public void testLeerArchivoExcelFormatoNoSoportado() throws BiffException,
 			IOException {
-		new ExcelReader().leerArchivoExcel(readInputFile(DIR_PATHFILE_NAME
-				+ "circuits_johnson.pdf"));
+		new ExcelReader().leerArchivoExcel(readInputFile(new ClassPathResource(
+				"circuits_johnson.pdf").getFile().getAbsolutePath()));
 	}
 
 	@Test()
 	// TODO? To transform in other kind of exception??? maybe a runtime???
 	public void testLeerArchivoExcelNoExiste() throws BiffException,
 			IOException {
-		new ExcelReader().leerArchivoExcel(DIR_PATHFILE_NAME + "noExisto.xyz");
+		new ExcelReader()
+				.leerArchivoExcel(new ClassPathResource("noExisto.xyz")
+						.getFile().getAbsolutePath());
 	}
 
 	@Test()
 	public void testLeerArchivoExcel() throws BiffException, IOException {
 		final ExcelReader excelReader = new ExcelReader();
 		final List<List<String>> archivoLeido = excelReader
-				.leerArchivoExcel(readInputFile(DIR_PATHFILE_NAME
-						+ "Libro5.xls"));
+				.leerArchivoExcel(readInputFile(new ClassPathResource(
+						"Dali Excel JXL.xls").getFile().getAbsolutePath()));
 		final String cellsFromXslFile = getMessageLog(archivoLeido);
 		LOG.debug("Read cells:\n" + cellsFromXslFile);
 	}
@@ -58,23 +61,20 @@ public class ExcelReaderTest {
 			inputFile = new FileInputStream(fileName);
 		} catch (IOException e) {
 			final StringBuilder msgErr = new StringBuilder();
-			msgErr.append("Error al leer el archivo de entrada. ");
+			msgErr.append("Error al leer el archivo de entrada.\n");
 			msgErr.append("Verifique que el archivo ");
 			msgErr.append(fileName);
 			msgErr.append(" exista.");
-			LOG.error("In readInputFile()", e);
+			LOG.error("In readInputFile(). " + msgErr, e);
 			assertNotNull(msgErr.toString(), inputFile);
 		}
 		return inputFile;
 	}
 
 	private static final Logger LOG;
-	private static final String DIR_PATHFILE_NAME;
-	// private static final String ELEM_SEPARATOR = " ";
 
 	static {
 		LOG = LoggerFactory.getLogger(ExcelReaderTest.class);
-		DIR_PATHFILE_NAME = "C:/Users/Cesar/Documents/development/BMV/";
 	}
 
 }

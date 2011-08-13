@@ -11,6 +11,7 @@ import java.util.Vector;
  * 
  */
 public class AdjacencyList {
+
 	/**
 	 * Calculates a adjacency-list for a given array of an adjacency-matrix.
 	 * 
@@ -41,4 +42,5 @@ public class AdjacencyList {
 
 		return list;
 	}
+
 }
