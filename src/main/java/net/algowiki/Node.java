@@ -4,28 +4,35 @@ public class Node {
 
 	public Integer index;
 	public int lowlink;
-	private final Integer id;
+	private transient final Integer identifier;
 
-	public Node(final Integer id) {
-		this.id = id;
+	public Node(final Integer identifier) {
+		this.identifier = identifier;
 	}
 
 	public Integer getId() {
-		return id;
+		return identifier;
 	}
 
 	@Override
 	public String toString() {
-		return id.toString();
+		return identifier.toString();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
+		Boolean areEqual;
 		if (obj instanceof Node) {
-			return id.equals(((Node) obj).id);
+			areEqual = identifier.equals(((Node) obj).identifier);
 		} else {
-			return false;
+			areEqual = Boolean.FALSE;
 		}
+		return areEqual;
+	}
+
+	@Override
+	public int hashCode() {
+		return identifier;
 	}
 
 }
